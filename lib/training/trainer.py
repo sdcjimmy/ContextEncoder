@@ -31,7 +31,7 @@ class NetworkTrainer(object):
                  batch_size = 4,
                  epochs = 10, 
                  dcm_loss = True, 
-                 padding_center = False,
+                 padding_center = False,                 
                  experiment = 'TEST',                 
                  gpu = '0',
                  ):
@@ -39,7 +39,7 @@ class NetworkTrainer(object):
         ## Set the default information
         self.info = OrderedDict()
         self.set_info(opt, lr, batch_size, epochs, dcm_loss, padding_center, experiment)
-        self.set_loss_weights()
+        self.set_default_info()
         self.device = torch.device("cuda:%s" % gpu if torch.cuda.is_available() else "cpu")                
         
         
@@ -81,11 +81,12 @@ class NetworkTrainer(object):
         self.info['padding_center'] = padding_center
         self.info['experiment'] = experiment
         
-    def set_loss_weights(self):
+    def set_default_info(self):
         self.info['Generator_adv_loss'] = 0.1
         self.info['Generator_mse_loss'] = 0.9
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
+        self.info['Sample_interval'] = 10
         
     
     def update_info(key, value):
@@ -209,29 +210,20 @@ class NetworkTrainer(object):
             if np.random.uniform(0,1) < sample_p:
                 self.sample_images(imgs, centers, pred_centers, epoch)
                 
-            # Advasarial loss
-            #dlabel.data.resize_(batch_size).fill_(1)
-            dlabel = torch.FloatTensor(batch_size).fill_(0).to(self.device)
-            
-            # Fake Image
+            # Advasarial loss            
+            # Fake Image succesfully fool the discriminator
+            dlabel = torch.FloatTensor(batch_size).fill_(1).to(self.device)
             disc_input = self.get_disc_input(imgs, pred_centers)
             output = self.discriminator(disc_input)
-            pred_dlabel, _ = self._get_output_labels(output)                   
-            lossAdv_fake = self.criteriaBCE(pred_dlabel, dlabel)
-        
-            # True Image
-            dlabel = torch.FloatTensor(batch_size).fill_(1).to(self.device)
-            disc_input = self.get_disc_input(imgs, centers)
-            output = self.discriminator(disc_input)
-            pred_dlabel, _ = self._get_output_labels(output)            
-       
-            lossAdv_true = self.criteriaBCE(pred_dlabel, dlabel)
+            pred_dlabel, _ = self._get_output_labels(output)                               
+                    
+            lossAdv_Encoder = self.criteriaBCE(pred_dlabel, dlabel)
 
             # MSE Loss           
             lossMSE_Encoder = self.criteriaMSE(pred_centers, centers)                             
             
             MSE_loss += lossMSE_Encoder.item()
-            Adv_loss += (lossAdv_true.item() + lossAdv_fake.item())/2
+            Adv_loss += lossAdv_Encoder.item()
     
         MSE_loss /= i
         Adv_loss /= i
@@ -378,12 +370,15 @@ class NetworkTrainer(object):
                 print('Validation MSE Loss: {}'.format(MSE_loss))
                 print('Validation Adv Loss: {}'.format(Adv_loss))
                                 
-                if MSE_loss + abs(Adv_loss-0.5) < self.results['best_loss']:
-                    self.results['best_loss'] = MSE_loss + abs(Adv_loss-0.5)
+                if MSE_loss + Adv_loss < self.results['best_loss']:
+                    self.results['best_loss'] = MSE_loss + Adv_loss
                     self.results['best_MSE'] = MSE_loss                                        
                     self.results['best_epoch'] = epoch + 1
                     torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))                   
                     print("Best Validation MSE improved!")                                    
+                    
+                elif (epoch+1) % self.info['Sample_interval'] == 0:
+                    torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))       
 
         # Save the training dice score using the best weights
         #self.evaluate_train()
@@ -416,6 +411,8 @@ class NetworkTrainer(object):
         loss_history = pd.DataFrame({'generator_training_loss': self.results['G_training_loss'],
                                     'discriminator_loss': self.results['D_training_loss']})
         loss_history.to_csv(os.path.join(self.output_dir, 'loss_history.csv'))
+        
+        torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch_last.pth"))
         
     def load_weights(self, weight_path):
         self.network.load_state_dict(torch.load(weight_path))

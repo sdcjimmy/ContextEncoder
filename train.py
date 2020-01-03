@@ -47,8 +47,12 @@ if __name__ == '__main__':
                             experiment = args.experiment,
                             gpu = args.gpu)
     
-    trainer.train()
-    trainer.save_results()
+    try:
+        trainer.train()
+        trainer.save_results()
+    except KeyboardInterrupt:
+        print('Keyboard interrupted! Saving results ...l')
+        trainer.save_results()
 
     
     
