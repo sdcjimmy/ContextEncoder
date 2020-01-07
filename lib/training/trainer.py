@@ -146,7 +146,7 @@ class NetworkTrainer(object):
             return CENet()
         elif net == 'disc':
             if self.info['dcm_loss']:
-                return Discriminator(9)
+                return Discriminator(10)
             else:
                 return Discriminator(1)
     

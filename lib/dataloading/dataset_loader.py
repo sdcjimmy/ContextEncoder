@@ -20,13 +20,8 @@ class SSIDataset(Dataset):
         self.indices = np.arange(self.df.shape[0])
         self.transform = transform
         self.inpaint = inpaint
-<<<<<<< HEAD
-        self.probe = self.df.Probe.map(probe_dict)
-        self.study = pd.get_dummies(self.df.Study.map(study_dict))
-=======
         self.probe = self.df.Probe.map(probe_dict)        
         self.study_binarize = self._binarize_study(self.df.Study.map(study_dict))
->>>>>>> 73baf5d2b1245eb86fffc05e14675e3857981e39
         self.rand = rand
 
         if shuffle == True:            
