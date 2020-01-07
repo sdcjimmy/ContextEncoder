@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from skimage.color import rgb2gray, gray2rgb
 from .mapping_dict import *
+from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
@@ -19,8 +20,13 @@ class SSIDataset(Dataset):
         self.indices = np.arange(self.df.shape[0])
         self.transform = transform
         self.inpaint = inpaint
+<<<<<<< HEAD
         self.probe = self.df.Probe.map(probe_dict)
         self.study = pd.get_dummies(self.df.Study.map(study_dict))
+=======
+        self.probe = self.df.Probe.map(probe_dict)        
+        self.study_binarize = self._binarize_study(self.df.Study.map(study_dict))
+>>>>>>> 73baf5d2b1245eb86fffc05e14675e3857981e39
         self.rand = rand
 
         if shuffle == True:            
@@ -60,10 +66,15 @@ class SSIDataset(Dataset):
             img[w//4:(w*3)//4, h//4:(h*3)//4, 2] = img[:, :, 2].min()
         return img, label
     
+    def _binarize_study(self, study):        
+        mlb = MultiLabelBinarizer()
+        return mlb.fit_transform(study)
+    
+    
     def _get_labels(self, idx):
         # probe
         probe = torch.tensor([self.probe[idx]], dtype= torch.uint8)
-        study = torch.tensor(pd.get_dummies(self.study).iloc[idx], dtype= torch.uint8)
+        study = torch.tensor(self.study_binarize[idx], dtype= torch.uint8)
         return torch.cat([probe, study])
     
     def __getitem__(self, idx):    
