@@ -10,18 +10,19 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from skimage.color import rgb2gray, gray2rgb
 from .mapping_dict import *
+from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand_gaussian = False):   
+    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None):   
         
         self.df = pd.read_csv(img_file)        
         self.indices = np.arange(self.df.shape[0])
         self.transform = transform
         self.inpaint = inpaint
-        self.probe = self.df.Probe.map(probe_dict)
-        self.study = pd.get_dummies(self.df.Study.map(study_dict))
-        self.rand_gaussian = rand_gaussian
+        self.probe = self.df.Probe.map(probe_dict)        
+        self.study_binarize = self._binarize_study(self.df.Study.map(study_dict))
+        self.rand = rand
 
         if shuffle == True:            
             np.random.shuffle(self.indices)                        
@@ -44,10 +45,14 @@ class SSIDataset(Dataset):
             img[1,w//4:(w*3)//4, h//4:(h*3)//4] = img[1,:, :].min()             
             img[2,w//4:(w*3)//4, h//4:(h*3)//4] = img[2,:, :].min()
             
-            if self.rand_gaussian:
+            if self.rand == 'gaussian':
                 img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4])
                 img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4])
                 img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4])
+            elif self.rand == 'uniform':
+                img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
+                img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
+                img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
             return img, label
         else:
             w, h = img.shape[0], img.shape[1]
@@ -56,10 +61,15 @@ class SSIDataset(Dataset):
             img[w//4:(w*3)//4, h//4:(h*3)//4, 2] = img[:, :, 2].min()
         return img, label
     
+    def _binarize_study(self, study):        
+        mlb = MultiLabelBinarizer()
+        return mlb.fit_transform(study)
+    
+    
     def _get_labels(self, idx):
         # probe
         probe = torch.tensor([self.probe[idx]], dtype= torch.uint8)
-        study = torch.tensor(pd.get_dummies(self.study).iloc[idx], dtype= torch.uint8)
+        study = torch.tensor(self.study_binarize[idx], dtype= torch.uint8)
         return torch.cat([probe, study])
     
     def __getitem__(self, idx):    
