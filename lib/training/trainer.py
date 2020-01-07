@@ -16,6 +16,7 @@ from lib.preprocessing import *
 from lib.dataloading import *
 from lib.loss_functions import *
 from lib.evaluation import *
+from lib.utilities.image_sampler import ImageSampler
 from torchvision import transforms
 import torchvision.models as models
 from torch.utils.tensorboard import SummaryWriter
@@ -32,13 +33,14 @@ class NetworkTrainer(object):
                  epochs = 10, 
                  dcm_loss = True, 
                  padding_center = False,                 
+                 center_distribution = None, 
                  experiment = 'TEST',                 
                  gpu = '0',
                  ):
         
         ## Set the default information
         self.info = OrderedDict()
-        self.set_info(opt, lr, batch_size, epochs, dcm_loss, padding_center, experiment)
+        self.set_info(opt, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment)
         self.set_default_info()
         self.device = torch.device("cuda:%s" % gpu if torch.cuda.is_available() else "cpu")                
         
@@ -50,7 +52,7 @@ class NetworkTrainer(object):
             self.all_dataset = self.load_dataset()        
         
         ## Output folder path 
-        self.output_dir = os.path.join("./results", experiment)
+        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results", experiment)
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
             
@@ -72,13 +74,14 @@ class NetworkTrainer(object):
         print("Training Number: %s" % (len(self.train_loader) * self.info['batch_size']))
         print("Validation Number: %s" % (len(self.val_loader) * self.info['batch_size']))
         
-    def set_info(self, opt, lr, batch_size, epochs, dcm_loss, padding_center, experiment):        
+    def set_info(self, opt, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
         self.info['optimizer'] = opt
         self.info['learning_rate'] = lr
         self.info['batch_size'] = batch_size
         self.info['epochs'] = epochs
         self.info['dcm_loss'] = dcm_loss
         self.info['padding_center'] = padding_center
+        self.info['center_distribution'] = center_distribution
         self.info['experiment'] = experiment
         
     def set_default_info(self):
@@ -86,8 +89,8 @@ class NetworkTrainer(object):
         self.info['Generator_mse_loss'] = 0.9
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
-        self.info['Sample_interval'] = 10
-        
+        self.info['sample_interval'] = 5
+       
     
     def update_info(key, value):
         self.info[key] = value    
@@ -106,8 +109,8 @@ class NetworkTrainer(object):
         return results
     
         
-    def load_dataset(self, list_id = None, transform = None, inpaint = False):
-        return SSIDataset(list_id = list_id, transform = transform, inpaint = inpaint) 
+    def load_dataset(self, list_id = None, transform = None, inpaint = False, rand = None):
+        return SSIDataset(list_id = list_id, transform = transform, inpaint = inpaint, rand = rand) 
         
         
     def data_split(self, validation_split = 0.2, random_seed = 123, shuffle_dataset = True):
@@ -122,8 +125,8 @@ class NetworkTrainer(object):
         
     def get_data_loader(self):
         train_indices, val_indices = self.data_split()
-        train_dataset = self.load_dataset(list_id = train_indices, transform = self.transform['train'], inpaint = True)
-        val_dataset = self.load_dataset(list_id = val_indices, transform = self.transform['val'], inpaint = True)
+        train_dataset = self.load_dataset(list_id = train_indices, transform = self.transform['train'], inpaint = True, rand = self.info['center_distribution'])
+        val_dataset = self.load_dataset(list_id = val_indices, transform = self.transform['val'], inpaint = True, rand = self.info['center_distribution'])
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.info['batch_size'], num_workers = 4)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=self.info['batch_size'], num_workers = 4)       
@@ -184,17 +187,22 @@ class NetworkTrainer(object):
 
     def sample_images(self, imgs, centers, pred_centers, epoch):
         true = self.padding_center(imgs, centers)        
-        true = make_grid(true, normalize= True)
+        true = make_grid(true, normalize= True, scale_each = True)
         self.writer.add_image('true_images', true, epoch)
                 
         pred = self.padding_center(imgs, pred_centers)
-        pred = make_grid(pred, normalize= True)
+        pred = make_grid(pred, normalize= True, scale_each = True)
         self.writer.add_image('pred_images', pred, epoch)
         
     
-    def evaluate(self, dataloader, epoch, sample_p = 0.1):
+    def evaluate(self, dataloader, epoch):
         self.generator.eval()
-        self.discriminator.eval()       
+        self.discriminator.eval()  
+        
+        sample = False
+        if (epoch+1) % self.info['sample_interval'] == 0:
+            sampler = ImageSampler()
+            sample = True
         
         #dlabel = torch.FloatTensor(self.info['batch_size'])
         MSE_loss = 0 
@@ -207,8 +215,8 @@ class NetworkTrainer(object):
                         
             pred_centers = self.generator(imgs)
             
-            if np.random.uniform(0,1) < sample_p:
-                self.sample_images(imgs, centers, pred_centers, epoch)
+            if sample:
+                sampler.sample(imgs, centers, pred_centers)                
                 
             # Advasarial loss            
             # Fake Image succesfully fool the discriminator
@@ -224,7 +232,12 @@ class NetworkTrainer(object):
             
             MSE_loss += lossMSE_Encoder.item()
             Adv_loss += lossAdv_Encoder.item()
-    
+        
+        if sample:
+            true, pred = sampler.make_grid()
+            self.writer.add_image('true_images', true, epoch)
+            self.writer.add_image('pred_images', pred, epoch)
+        
         MSE_loss /= i
         Adv_loss /= i
         
@@ -377,7 +390,7 @@ class NetworkTrainer(object):
                     torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))                   
                     print("Best Validation MSE improved!")                                    
                     
-                elif (epoch+1) % self.info['Sample_interval'] == 0:
+                elif (epoch+1) % self.info['sample_interval'] == 0:
                     torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))       
 
         # Save the training dice score using the best weights

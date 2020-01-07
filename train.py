@@ -28,6 +28,7 @@ def get_args():
     parser.add_argument('-o', '--optimizer', type = str,  help = "The optimizer", default = 'adam')
     parser.add_argument('-r', '--regularizer', type = float,  help = "The coefficient for regularizer(weight decay)", default = 0.001)
     parser.add_argument('-g', '--gpu', type = str,  choices = ['0', '1'], help = "The gpu used", default = '0')
+    parser.add_argument('-cd', '--center_distribution', type = str, help = "The inital distribution for the center image", default = 'uniform')
     parser.add_argument('-d', '--dcm_loss', action = 'store_false', default = True) 
     parser.add_argument('-p', '--padding_center', action = 'store_true', default = False) 
 
@@ -44,6 +45,7 @@ if __name__ == '__main__':
                             epochs = args.epochs,
                             dcm_loss = args.dcm_loss,
                             padding_center = args.padding_center,
+                            center_distribution = args.center_distribution,
                             experiment = args.experiment,
                             gpu = args.gpu)
     

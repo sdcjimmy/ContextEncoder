@@ -13,7 +13,7 @@ from .mapping_dict import *
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand_gaussian = False):   
+    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None):   
         
         self.df = pd.read_csv(img_file)        
         self.indices = np.arange(self.df.shape[0])
@@ -21,7 +21,7 @@ class SSIDataset(Dataset):
         self.inpaint = inpaint
         self.probe = self.df.Probe.map(probe_dict)
         self.study = pd.get_dummies(self.df.Study.map(study_dict))
-        self.rand_gaussian = rand_gaussian
+        self.rand = rand
 
         if shuffle == True:            
             np.random.shuffle(self.indices)                        
@@ -44,10 +44,14 @@ class SSIDataset(Dataset):
             img[1,w//4:(w*3)//4, h//4:(h*3)//4] = img[1,:, :].min()             
             img[2,w//4:(w*3)//4, h//4:(h*3)//4] = img[2,:, :].min()
             
-            if self.rand_gaussian:
+            if self.rand == 'gaussian':
                 img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4])
                 img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4])
                 img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4])
+            elif self.rand == 'uniform':
+                img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
+                img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
+                img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
             return img, label
         else:
             w, h = img.shape[0], img.shape[1]
