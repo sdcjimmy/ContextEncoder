@@ -10,10 +10,10 @@
 #python train.py -e base-padding-dcm   -n 150 -b 8 -l 0.0001 -p
 #python train.py -e base-padding-nodcm -n 150 -b 8 -l 0.0001 -d -p
 #python train.py -e base-nodcm         -n 150 -b 8 -l 0.0001 -d 
-<<<<<<< HEAD
+
+#python train.py -e base-padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
+#python train.py -e base-padding-nodcm-uni -n 100 -b 8 -l 0.0001 -d -p  -cd uniform
 
 
-python train.py -e base-padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
-python train.py -e base-padding-nodcm-uni -n 100 -b 8 -l 0.0001 -d -p  -cd uniform
-=======
->>>>>>> 73baf5d2b1245eb86fffc05e14675e3857981e39
+python train.py -e nopadding-dcm-uni -n 100 -b 8 -l 0.0001        -cd uniform
+python train.py -e padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
