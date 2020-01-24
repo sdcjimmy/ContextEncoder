@@ -154,7 +154,7 @@ class NetworkTrainer(object):
             return CENet(), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1)
         elif net == 'vgg-unet':
             self.info['output_resize'] = True
-            return VGGCEUNet(), Discriminator(n_input = 1, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
+            return VGGCEUNet(num_classes = 3), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
     
     def get_transform(self):
