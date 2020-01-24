@@ -196,6 +196,7 @@ class NetworkTrainer(object):
     def sample_images(self, imgs, centers, pred_centers, epoch):
         if self.info['network'] == 'vgg-unet':
             centers = interpolate(centers, scale_factor = 0.5)
+            pred_centers = interpolate(pred_centers, scale_factor = 0.5)
         
         true = self.padding_center(imgs, centers)        
         true = make_grid(true, normalize= True, scale_each = True)
@@ -227,6 +228,9 @@ class NetworkTrainer(object):
             pred_centers = self.generator(imgs)
             
             if sample:
+                if self.info['network'] == 'vgg-unet':
+                    centers = interpolate(centers, scale_factor = 0.5)
+                    pred_centers = interpolate(pred_centers, scale_factor = 0.5)
                 sampler.sample(imgs, centers, pred_centers)                
                 
             # Advasarial loss            
