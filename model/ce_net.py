@@ -70,13 +70,18 @@ class CENet(nn.Module):
     
 
 class Discriminator(nn.Module):
-    def __init__(self, n_classes):
+    def __init__(self, n_classes, n_block = 4):
         super(Discriminator, self).__init__()
+        self.n_block = n_block
+        
         self.conv1 = DiscBlock(3, 64)
         self.conv2 = DiscBlock(64,128)
         self.conv3 = DiscBlock(128,256)
         self.conv4 = DiscBlock(256,512)    
         
+        if self.n_block == 5:
+            self.conv5 = DiscBlock(512,512)    
+                
         self.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.fc = nn.Linear(512, n_classes)
 
@@ -85,6 +90,9 @@ class Discriminator(nn.Module):
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
+        if self.n_block == 5:
+            x = self.conv5(x)
+            
         x = self.avgpool(x)
         x = x.view(-1, 512)
         x = self.fc(x)

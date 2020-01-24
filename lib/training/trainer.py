@@ -52,7 +52,7 @@ class NetworkTrainer(object):
             self.all_dataset = self.load_dataset()        
         
         ## Output folder path 
-        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results", experiment)
+        self.output_dir = os.path.join("./results", experiment)
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
             
@@ -90,7 +90,11 @@ class NetworkTrainer(object):
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
         self.info['sample_interval'] = 5
-       
+        
+        if self.info['dcm_loss']:
+            self.info['n_dcm_labels'] = 8       
+        else:
+            self.info['n_dcm_labels'] = 0
     
     def update_info(key, value):
         self.info[key] = value    
@@ -143,12 +147,10 @@ class NetworkTrainer(object):
     
     def get_network(self, net = 'ce-net'):                
         if net == 'ce-net':
-            return CENet()
-        elif net == 'disc':
-            if self.info['dcm_loss']:
-                return Discriminator(10)
-            else:
-                return Discriminator(1)
+            return CENet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1)
+        elif net == 'vgg-ce-unet':
+            return VGGCEUNet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
+        
     
     def get_transform(self):
         return get_transformer_norm()
