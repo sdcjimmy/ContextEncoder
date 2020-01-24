@@ -15,7 +15,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize= False):   
+    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize = False):   
         
         self.df = pd.read_csv(img_file)        
         self.indices = np.arange(self.df.shape[0])
@@ -79,6 +79,9 @@ class SSIDataset(Dataset):
         study = torch.tensor(self.study_binarize[idx], dtype= torch.uint8)
         return torch.cat([probe, study])
     
+    def _output_resize(self, center):
+        return interpolate(center.unsqueeze(0), scale_factor = 2).squeeze(0)
+    
     def __getitem__(self, idx):    
         ds = pydicom.dcmread(self.df.iloc[idx].Image_Path)
         try:
@@ -108,6 +111,7 @@ class SSIDataset(Dataset):
             crop_img, center = self._inpaint(img)   
             if self.output_resize:
                 center = self._output_resize(center)
+            
             return crop_img, center, labels
         else:
             return img
