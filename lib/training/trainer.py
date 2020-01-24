@@ -19,6 +19,7 @@ from lib.evaluation import *
 from lib.utilities.image_sampler import ImageSampler
 from torchvision import transforms
 import torchvision.models as models
+from torch.nn.functional import interpolate
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.utils import make_grid
 from torch import optim, nn
@@ -193,6 +194,9 @@ class NetworkTrainer(object):
         return disc_input
 
     def sample_images(self, imgs, centers, pred_centers, epoch):
+        if self.info['network'] == 'vgg-unet':
+            centers = interpolate(centers, scale_factor = 0.5)
+        
         true = self.padding_center(imgs, centers)        
         true = make_grid(true, normalize= True, scale_each = True)
         self.writer.add_image('true_images', true, epoch)
