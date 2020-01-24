@@ -70,11 +70,12 @@ class CENet(nn.Module):
     
 
 class Discriminator(nn.Module):
-    def __init__(self, n_classes, n_block = 4):
+    def __init__(self, n_input, n_classes, n_block = 4):
         super(Discriminator, self).__init__()
+        self.n_input = n_input
         self.n_block = n_block
         
-        self.conv1 = DiscBlock(3, 64)
+        self.conv1 = DiscBlock(self.n_input, 64)
         self.conv2 = DiscBlock(64,128)
         self.conv3 = DiscBlock(128,256)
         self.conv4 = DiscBlock(256,512)    

@@ -96,7 +96,7 @@ class NetworkTrainer(object):
         self.info['output_resize'] = False
         
         if self.info['dcm_loss']:
-            self.info['n_dcm_labels'] = 9
+            self.info['n_dcm_labels'] = 9       
         else:
             self.info['n_dcm_labels'] = 0
     
@@ -151,10 +151,10 @@ class NetworkTrainer(object):
     
     def get_network(self, net = 'ce-net'):                
         if net == 'ce-net':
-            return CENet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1)
+            return CENet(), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1)
         elif net == 'vgg-unet':
             self.info['output_resize'] = True
-            return VGGCEUNet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
+            return VGGCEUNet(), Discriminator(n_input = 1, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
     
     def get_transform(self):
