@@ -40,7 +40,7 @@ class UNet(nn.Module):
         self.down4 = self.pretrain_model.down4
         '''
         
-        self.inc = inconv(n_channels, 64)
+        self.inc = inconv(1, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
         self.down3 = down(256, 512)
@@ -49,7 +49,7 @@ class UNet(nn.Module):
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
         self.up4 = up(128, 64)
-        self.outc = outconv(64, n_classes)
+        self.outc = outconv(64, 2)
 
     def forward(self, x):
         x1 = self.inc(x)

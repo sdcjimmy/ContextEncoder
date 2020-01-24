@@ -73,6 +73,8 @@ class NetworkTrainer(object):
         print("Network initizliation:")
         print("Training Number: %s" % (len(self.train_loader) * self.info['batch_size']))
         print("Validation Number: %s" % (len(self.val_loader) * self.info['batch_size']))
+
+        self.save_results(init = True)
         
     def set_info(self, opt, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
         self.info['optimizer'] = opt
@@ -85,10 +87,10 @@ class NetworkTrainer(object):
         self.info['experiment'] = experiment
         
     def set_default_info(self):
-        self.info['Generator_adv_loss'] = 0.1
-        self.info['Generator_mse_loss'] = 0.9
-        self.info['Discriminator_adv_loss'] = 0.9
-        self.info['Discriminator_dcm_loss'] = 0.1
+        self.info['Generator_adv_loss'] = 0.01
+        self.info['Generator_mse_loss'] = 0.99
+        self.info['Discriminator_adv_loss'] = 1
+        self.info['Discriminator_dcm_loss'] = 0
         self.info['sample_interval'] = 5
        
     
@@ -412,11 +414,17 @@ class NetworkTrainer(object):
         
     def plot_training():
         pass
-    def save_results(self):
+    def save_results(self, init = False):
         config = configparser.ConfigParser()        
         config['INFO'] = self.info
+
+        if init:
+            with open(os.path.join(self.output_dir, 'exp.ini'), 'w') as configfile:
+                config.write(configfile)
+            return
+        
         config['BEST RESULTS'] = {'val_mse': self.results['best_MSE'],                             
-                              'best_epoch': self.results['best_epoch']}        
+                                  'best_epoch': self.results['best_epoch']}        
         
         with open(os.path.join(self.output_dir, 'exp.ini'), 'w') as configfile:
             config.write(configfile)

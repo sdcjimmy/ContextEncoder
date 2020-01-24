@@ -8,13 +8,14 @@ import pickle
 
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+from torch.nn.functional import interpolate
 from skimage.color import rgb2gray, gray2rgb
 from .mapping_dict import *
 from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None):   
+    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize= False):   
         
         self.df = pd.read_csv(img_file)        
         self.indices = np.arange(self.df.shape[0])
@@ -23,6 +24,7 @@ class SSIDataset(Dataset):
         self.probe = self.df.Probe.map(probe_dict)        
         self.study_binarize = self._binarize_study(self.df.Study.map(study_dict))
         self.rand = rand
+        self.output_resize = output_resize
 
         if shuffle == True:            
             np.random.shuffle(self.indices)                        
@@ -65,6 +67,11 @@ class SSIDataset(Dataset):
         mlb = MultiLabelBinarizer()
         return mlb.fit_transform(study)
     
+    def _output_resize(self, center):
+        
+        return interpolate(center.unsqueeze(0), scale_factor = 2).squeeze(0)
+        
+  
     
     def _get_labels(self, idx):
         # probe
@@ -98,7 +105,9 @@ class SSIDataset(Dataset):
         
         if self.inpaint:
             labels = self._get_labels(idx)
-            crop_img, center = self._inpaint(img)            
+            crop_img, center = self._inpaint(img)   
+            if self.output_resize:
+                center = self._output_resize(center)
             return crop_img, center, labels
         else:
             return img
