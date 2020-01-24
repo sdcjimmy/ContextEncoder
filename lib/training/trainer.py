@@ -90,6 +90,7 @@ class NetworkTrainer(object):
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
         self.info['sample_interval'] = 5
+        self.info['output_resize'] = False
         
         if self.info['dcm_loss']:
             self.info['n_dcm_labels'] = 8       
@@ -114,7 +115,7 @@ class NetworkTrainer(object):
     
         
     def load_dataset(self, list_id = None, transform = None, inpaint = False, rand = None):
-        return SSIDataset(list_id = list_id, transform = transform, inpaint = inpaint, rand = rand) 
+        return SSIDataset(list_id = list_id, transform = transform, inpaint = inpaint, rand = rand, output_resize = self.info['output_resize']) 
         
         
     def data_split(self, validation_split = 0.2, random_seed = 123, shuffle_dataset = True):
@@ -149,6 +150,7 @@ class NetworkTrainer(object):
         if net == 'ce-net':
             return CENet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1)
         elif net == 'vgg-ce-unet':
+            self.info['output_resize'] = True
             return VGGCEUNet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
     
