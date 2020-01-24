@@ -96,7 +96,7 @@ class NetworkTrainer(object):
         self.info['output_resize'] = False
         
         if self.info['dcm_loss']:
-            self.info['n_dcm_labels'] = 8       
+            self.info['n_dcm_labels'] = 9
         else:
             self.info['n_dcm_labels'] = 0
     

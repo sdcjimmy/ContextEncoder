@@ -21,7 +21,7 @@ from torch import optim, nn
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', type = str, help = "The name of the experiement", default = 'TEST_sw')
-    parser.add_argument('-m', '--network', type = str, choices = ['ce-net', 'vgg-unet'], help = "The name of the model", default = 'ce-net')
+    parser.add_argument('-m', '--model', type = str, choices = ['ce-net', 'vgg-unet'], help = "The name of the model", default = 'ce-net')
     parser.add_argument('-n', '--epochs', type = int, help = "The number of epochs", default = 10)
     parser.add_argument('-b', '--batch_size', type = int, help = "The batch size", default = 4)
     parser.add_argument('-l', '--learning_rate', type = float, help = "The learning rate", default = 0.02)
