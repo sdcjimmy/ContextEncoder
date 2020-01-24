@@ -28,6 +28,7 @@ class NetworkTrainer(object):
 
     def __init__(self,                  
                  opt = 'adam', 
+                 network = 'ce-net',
                  lr = 0.001,                 
                  batch_size = 4,
                  epochs = 10, 
@@ -40,7 +41,7 @@ class NetworkTrainer(object):
         
         ## Set the default information
         self.info = OrderedDict()
-        self.set_info(opt, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment)
+        self.set_info(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment)
         self.set_default_info()
         self.device = torch.device("cuda:%s" % gpu if torch.cuda.is_available() else "cpu")                
         
@@ -62,8 +63,7 @@ class NetworkTrainer(object):
         self.results = self.intialize_results_dict()
         
         # Network
-        self.generator = self.get_network('ce-net')
-        self.discriminator = self.get_network('disc')
+        self.generator, self.discriminator = self.get_network(self.info['network'])
         #self.optimizer = self.get_optimizer()                
         self.criteriaMSE = self.get_loss_fx('MSE')
         self.criteriaBCE = self.get_loss_fx('BCE')
@@ -74,8 +74,9 @@ class NetworkTrainer(object):
         print("Training Number: %s" % (len(self.train_loader) * self.info['batch_size']))
         print("Validation Number: %s" % (len(self.val_loader) * self.info['batch_size']))
         
-    def set_info(self, opt, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
+    def set_info(self, opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
         self.info['optimizer'] = opt
+        self.info['network'] = network
         self.info['learning_rate'] = lr
         self.info['batch_size'] = batch_size
         self.info['epochs'] = epochs
@@ -149,7 +150,7 @@ class NetworkTrainer(object):
     def get_network(self, net = 'ce-net'):                
         if net == 'ce-net':
             return CENet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1)
-        elif net == 'vgg-ce-unet':
+        elif net == 'vgg-unet':
             self.info['output_resize'] = True
             return VGGCEUNet(), Discriminator(n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
