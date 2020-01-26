@@ -19,4 +19,7 @@
 #python train.py -e padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
 
 
-python train.py -e nopadding-nodcm-uni2   -n 300 -b 8 -l 0.0001 -p -d -cd uniform
+#python train.py -e nopadding-nodcm-uni2   -n 300 -b 8 -l 0.0001 -p -d -cd uniform
+
+python train.py -e vggunet-nopadding-dcm-uni3    -m vgg-unet -n 200 -b 8 -l 0.0001  -cd uniform
+python train.py -e vggunet-nopadding-nodcm-uni3  -m vgg-unet -n 200 -b 8 -l 0.0001  -cd uniform -d

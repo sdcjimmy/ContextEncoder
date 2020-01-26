@@ -89,10 +89,10 @@ class NetworkTrainer(object):
         self.info['experiment'] = experiment
         
     def set_default_info(self):
-        self.info['Generator_adv_loss'] = 0.01
-        self.info['Generator_mse_loss'] = 0.99
-        self.info['Discriminator_adv_loss'] = 1
-        self.info['Discriminator_dcm_loss'] = 0
+        self.info['Generator_adv_loss'] = 0.001
+        self.info['Generator_mse_loss'] = 0.999
+        self.info['Discriminator_adv_loss'] = 0.9
+        self.info['Discriminator_dcm_loss'] = 0.1
         self.info['sample_interval'] = 5
         self.info['output_resize'] = False
         
@@ -268,7 +268,7 @@ class NetworkTrainer(object):
         
         # Define the optimizer for the network
         optG = optim.Adam(self.generator.parameters(), lr = self.info['learning_rate'])         
-        optD = optim.Adam(self.discriminator.parameters(), lr = self.info['learning_rate'])
+        optD = optim.Adam(self.discriminator.parameters(), lr = self.info['learning_rate']/10)
         
         for epoch in range(epochs):
             print('Starting epoch {}/{}.'.format(epoch + 1, epochs))
