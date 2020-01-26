@@ -15,5 +15,8 @@
 #python train.py -e base-padding-nodcm-uni -n 100 -b 8 -l 0.0001 -d -p  -cd uniform
 
 
-python train.py -e nopadding-dcm-uni -n 100 -b 8 -l 0.0001        -cd uniform
-python train.py -e padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
+#python train.py -e nopadding-dcm-uni -n 100 -b 8 -l 0.0001        -cd uniform
+#python train.py -e padding-dcm-uni   -n 100 -b 8 -l 0.0001 -p     -cd uniform
+
+
+python train.py -e nopadding-nodcm-uni2   -n 300 -b 8 -l 0.0001 -p -d -cd uniform

@@ -153,5 +153,9 @@ class VGGCEUNet(nn.Module):
         if self.down_sample < 1:
             x_out = interpolate(x_out, scale_factor = self.down_sample)
 
+<<<<<<< HEAD
         x_out = self.final_act(x_out)
         return x_out
+=======
+        return F.sigmoid(x_out)
+>>>>>>> 6fd5c9fab26c41a91fcdefdc88ef48bdcf70cce7

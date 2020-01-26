@@ -74,6 +74,8 @@ class NetworkTrainer(object):
         print("Network initizliation:")
         print("Training Number: %s" % (len(self.train_loader) * self.info['batch_size']))
         print("Validation Number: %s" % (len(self.val_loader) * self.info['batch_size']))
+
+        self.save_results(init = True)
         
     def set_info(self, opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
         self.info['optimizer'] = opt
@@ -194,6 +196,7 @@ class NetworkTrainer(object):
     def sample_images(self, imgs, centers, pred_centers, epoch):
         if self.info['network'] == 'vgg-unet':
             centers = interpolate(centers, scale_factor = 0.5)
+            pred_centers = interpolate(pred_centers, scale_factor = 0.5)
         
         true = self.padding_center(imgs, centers)        
         true = make_grid(true, normalize= True, scale_each = True)
@@ -225,6 +228,9 @@ class NetworkTrainer(object):
             pred_centers = self.generator(imgs)
             
             if sample:
+                if self.info['network'] == 'vgg-unet':
+                    centers = interpolate(centers, scale_factor = 0.5)
+                    pred_centers = interpolate(pred_centers, scale_factor = 0.5)
                 sampler.sample(imgs, centers, pred_centers)                
                 
             # Advasarial loss            
@@ -421,11 +427,17 @@ class NetworkTrainer(object):
         
     def plot_training():
         pass
-    def save_results(self):
+    def save_results(self, init = False):
         config = configparser.ConfigParser()        
         config['INFO'] = self.info
+
+        if init:
+            with open(os.path.join(self.output_dir, 'exp.ini'), 'w') as configfile:
+                config.write(configfile)
+            return
+        
         config['BEST RESULTS'] = {'val_mse': self.results['best_MSE'],                             
-                              'best_epoch': self.results['best_epoch']}        
+                                  'best_epoch': self.results['best_epoch']}        
         
         with open(os.path.join(self.output_dir, 'exp.ini'), 'w') as configfile:
             config.write(configfile)

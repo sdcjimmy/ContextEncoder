@@ -67,6 +67,11 @@ class SSIDataset(Dataset):
         mlb = MultiLabelBinarizer()
         return mlb.fit_transform(study)
     
+    def _output_resize(self, center):
+        
+        return interpolate(center.unsqueeze(0), scale_factor = 2).squeeze(0)
+        
+  
     
     def _get_labels(self, idx):
         # probe
@@ -103,9 +108,9 @@ class SSIDataset(Dataset):
         
         if self.inpaint:
             labels = self._get_labels(idx)
-            crop_img, center = self._inpaint(img)     
+            crop_img, center = self._inpaint(img)   
             if self.output_resize:
-                center = self._output_resieze(center)
+                center = self._output_resize(center)
             
             return crop_img, center, labels
         else:
