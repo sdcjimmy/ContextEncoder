@@ -54,7 +54,7 @@ class NetworkTrainer(object):
             self.all_dataset = self.load_dataset()        
         
         ## Output folder path 
-        self.output_dir = os.path.join("./results", experiment)
+        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results", experiment)
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
             
@@ -87,11 +87,11 @@ class NetworkTrainer(object):
         self.info['experiment'] = experiment
         
     def set_default_info(self):
-        self.info['Generator_adv_loss'] = 0.1
-        self.info['Generator_mse_loss'] = 0.9
+        self.info['Generator_adv_loss'] = 0.001
+        self.info['Generator_mse_loss'] = 0.999
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
-        self.info['sample_interval'] = 5
+        self.info['sample_interval'] = 10
         self.info['output_resize'] = False
         
         if self.info['dcm_loss']:
@@ -153,7 +153,7 @@ class NetworkTrainer(object):
             return CENet(), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1)
         elif net == 'vgg-unet':
             self.info['output_resize'] = True
-            return VGGCEUNet(num_classes = 3), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
+            return VGGCEUNet(num_classes = 3, activation = 'tanh'), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
     
     def get_transform(self):
