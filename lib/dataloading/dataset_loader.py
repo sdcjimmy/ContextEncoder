@@ -15,9 +15,10 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file = '/home/jimmy/Data/SSI/ssi.csv', shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize = False):   
+    def __init__(self, img_file, rel_path = "" , shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize = False):   
         
         self.df = pd.read_csv(img_file)        
+        self.data_path = rel_path
         self.indices = np.arange(self.df.shape[0])
         self.transform = transform
         self.inpaint = inpaint
@@ -83,7 +84,13 @@ class SSIDataset(Dataset):
         return interpolate(center.unsqueeze(0), scale_factor = 2).squeeze(0)
     
     def __getitem__(self, idx):    
-        ds = pydicom.dcmread(self.df.iloc[idx].Image_Path)
+        if self.data_path == "":
+            # No data path specific, use the absolute file path
+            ds_path = self.df.iloc[idx].Image_Path
+        else:
+            # Use the relative path as the data path
+            ds_path = os.path.join(self.data_path, self.df.iloc[idx].relative_path)
+        ds = pydicom.dcmread(ds_path)
         try:
             img = ds.pixel_array
         except Exception as e:

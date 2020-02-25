@@ -20,7 +20,7 @@ from torch import optim, nn
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--experiment', type = str, help = "The name of the experiement", default = 'TEST_sw')
+    parser.add_argument('-e', '--experiment', type = str, help = "The name of the experiement", default = 'TEST')
     parser.add_argument('-m', '--model', type = str, choices = ['ce-net', 'vgg-unet'], help = "The name of the model", default = 'ce-net')
     parser.add_argument('-n', '--epochs', type = int, help = "The number of epochs", default = 10)
     parser.add_argument('-b', '--batch_size', type = int, help = "The batch size", default = 4)
@@ -32,6 +32,7 @@ def get_args():
     parser.add_argument('-cd', '--center_distribution', type = str, help = "The inital distribution for the center image", default = 'uniform')
     parser.add_argument('-d', '--dcm_loss', action = 'store_false', default = True) 
     parser.add_argument('-p', '--padding_center', action = 'store_true', default = False) 
+    parser.add_argument('-cl', '--cluster', action = 'store_true', help = "Whether the model is trained on a cluster",default = False) 
 
 
     return parser.parse_args()
@@ -39,7 +40,7 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-        
+
     trainer = NetworkTrainer(opt = args.optimizer,
                              network = args.model, 
                             lr = args.learning_rate,
@@ -49,7 +50,8 @@ if __name__ == '__main__':
                             padding_center = args.padding_center,
                             center_distribution = args.center_distribution,
                             experiment = args.experiment,
-                            gpu = args.gpu)
+                            gpu = args.gpu,
+                            cluster = args.cluster)
     
     try:
         trainer.train()

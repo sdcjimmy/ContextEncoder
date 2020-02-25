@@ -36,7 +36,7 @@ class ConvBatchRelu(nn.Module):
 
 
 class VGGCEUNet(nn.Module):
-    def __init__(self, num_classes=1, num_filters=32, pretrained=False, self_trained = '', freeze = False, activation = 'sigmoid'):
+    def __init__(self, num_classes=1, num_filters=32, pretrained=False, self_trained = '', freeze = False, activation = 'sigmoid', down_sample = 1):
         """
         :param num_classes:
         :param num_filters:

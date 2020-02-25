@@ -38,6 +38,7 @@ class NetworkTrainer(object):
                  center_distribution = None, 
                  experiment = 'TEST',                 
                  gpu = '0',
+                 cluster = False,
                  ):
         
         ## Set the default information
@@ -45,20 +46,32 @@ class NetworkTrainer(object):
         self.set_info(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment)
         self.set_default_info()
         self.device = torch.device("cuda:%s" % gpu if torch.cuda.is_available() else "cpu")                
+
+
+        ## Define the base directory 
+        if cluster:
+            self.data_folder = os.environ['SLURM_JOB_SCRATCHDIR']
+            self.output_dir = './results'
+        else:
+            self.data_folder = '/media/jimmy/224CCF8B4CCF57E5/Data'
+            self.output_dir = '/mnt/Liver/GE_study_hri/ContextEncoder/results'
         
+        self.data_path = os.path.join(self.data_folder, 'SSI')
+        self.img_file = os.path.join(self.data_folder, 'SSI', 'ssi.csv')
+    
+
+        ## Output folder path 
+        self.output_dir = os.path.join(self.output_dir, experiment)
+        if not os.path.exists(self.output_dir):
+            os.mkdir(self.output_dir)
+            
+        self.writer = SummaryWriter(log_dir = self.output_dir)
         
         ## Dataset              
         if self.info['experiment'] == 'TEST':
             self.all_dataset = self.load_dataset(list_id = range(101))
         else:
             self.all_dataset = self.load_dataset()        
-        
-        ## Output folder path 
-        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results", experiment)
-        if not os.path.exists(self.output_dir):
-            os.mkdir(self.output_dir)
-            
-        self.writer = SummaryWriter(log_dir = self.output_dir)
         
         ## initialize results dictionary
         self.results = self.intialize_results_dict()
@@ -89,8 +102,8 @@ class NetworkTrainer(object):
         self.info['experiment'] = experiment
         
     def set_default_info(self):
-        self.info['Generator_adv_loss'] = 0.001
-        self.info['Generator_mse_loss'] = 0.999
+        self.info['Generator_adv_loss'] = 0.05
+        self.info['Generator_mse_loss'] = 0.95
         self.info['Discriminator_adv_loss'] = 0.9
         self.info['Discriminator_dcm_loss'] = 0.1
         self.info['sample_interval'] = 10
@@ -119,7 +132,7 @@ class NetworkTrainer(object):
     
         
     def load_dataset(self, list_id = None, transform = None, inpaint = False, rand = None):
-        return SSIDataset(list_id = list_id, transform = transform, inpaint = inpaint, rand = rand, output_resize = self.info['output_resize']) 
+        return SSIDataset(img_file = self.img_file, rel_path = self.data_path, list_id = list_id, transform = transform, inpaint = inpaint, rand = rand, output_resize = self.info['output_resize']) 
         
         
     def data_split(self, validation_split = 0.2, random_seed = 123, shuffle_dataset = True):
