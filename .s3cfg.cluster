@@ -1,0 +1,12 @@
+proxy_host = httpproxy.mrl.prod.ccds.io
+proxy_port = 3128
+
+# Setup endpoint: hostname of the Web App
+host_base = ogw.ccds.io
+host_bucket = ogw.ccds.io
+
+# Leave as default
+use_https = True
+
+# Use S3 v4 signature APIs
+signature_v2 = False
