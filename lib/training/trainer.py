@@ -51,7 +51,10 @@ class NetworkTrainer(object):
         ## Define the base directory 
         if cluster:
             self.data_folder = os.environ['SLURM_JOB_SCRATCHDIR']
-            self.output_dir = './results'
+            self.output_dir = os.path.join(self.data_folder, 'results')
+            if not os.path.exists(self.output_dir):
+                os.mkdir(self.output_dir)
+
         else:
             self.data_folder = '/media/jimmy/224CCF8B4CCF57E5/Data'
             self.output_dir = '/mnt/Liver/GE_study_hri/ContextEncoder/results'
