@@ -98,4 +98,36 @@ class Discriminator(nn.Module):
         x = x.view(-1, 512)
         x = self.fc(x)
         return nn.Sigmoid()(x)
+    
+    
+class LinearDiscriminator(nn.Module):
+    def __init__(self, n_input, n_classes):
+        super(Discriminator, self).__init__()
+        self.n_input = n_input
+        self.n_block = n_block
+        
+        self.conv1 = DiscBlock(self.n_input, 64)
+        self.conv2 = DiscBlock(64,128)
+        self.conv3 = DiscBlock(128,256)
+        self.conv4 = DiscBlock(256,512)    
+                                                
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        
+        self.classifier = nn.Linear(512, 1)
+        self.linear_project = nn.Linear(512, n_classes)                
+
+    def forward(self, x, y):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)        
+            
+        x = self.avgpool(x)
+        x = x.view(-1, 512)
+        
+        x1 = self.classifier(x)
+        x2 = self.linear_project(x).dot(y)
+                
+        return nn.Sigmoid()(x1+x2)
+        
         
