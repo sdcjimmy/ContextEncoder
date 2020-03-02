@@ -28,11 +28,13 @@ def get_args():
     parser.add_argument('-s', '--validation_split', type = float,  help = "The validation split percentage", default = 0.2)
     parser.add_argument('-o', '--optimizer', type = str,  help = "The optimizer", default = 'adam')
     parser.add_argument('-r', '--regularizer', type = float,  help = "The coefficient for regularizer(weight decay)", default = 0.001)
-    parser.add_argument('-g', '--gpu', type = str,  choices = ['0', '1'], help = "The gpu used", default = '0')
+    parser.add_argument('-g', '--gpu', type = str, help = "The gpu used", default = '0')
     parser.add_argument('-cd', '--center_distribution', type = str, help = "The inital distribution for the center image", default = 'uniform')
     parser.add_argument('-d', '--dcm_loss', action = 'store_false', default = True) 
     parser.add_argument('-p', '--padding_center', action = 'store_true', default = False) 
     parser.add_argument('-cl', '--cluster', action = 'store_true', help = "Whether the model is trained on a cluster",default = False) 
+    parser.add_argument('-lx', '--loss_type', choices = ['hinge', 'dcgan'], type = str, help = "The loss function", default = 'hinge')
+    
 
 
     return parser.parse_args()
@@ -41,12 +43,13 @@ def get_args():
 if __name__ == '__main__':
     args = get_args()
 
-    trainer = NetworkTrainer(opt = args.optimizer,
+    trainer = LinearProjectNetworkTrainer(opt = args.optimizer,
                              network = args.model, 
                             lr = args.learning_rate,
                             batch_size = args.batch_size,
                             epochs = args.epochs,
                             dcm_loss = args.dcm_loss,
+                            loss_type = args.loss_type,
                             padding_center = args.padding_center,
                             center_distribution = args.center_distribution,
                             experiment = args.experiment,

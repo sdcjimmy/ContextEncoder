@@ -36,7 +36,7 @@ class ConvBatchRelu(nn.Module):
 
 
 class VGGCEUNet(nn.Module):
-    def __init__(self, num_classes=1, num_filters=32, pretrained=False, self_trained = '', freeze = False, activation = 'sigmoid', down_sample = 1):
+    def __init__(self, num_classes=1, num_filters=32, pretrained=False, self_trained = '', freeze = False, activation = 'none', down_sample = 1):
         """
         :param num_classes:
         :param num_filters:
@@ -50,6 +50,7 @@ class VGGCEUNet(nn.Module):
         super().__init__()
         self.num_classes = num_classes
         self.down_sample = down_sample
+        self.activation = activation
         self.encoder = models.vgg16_bn(pretrained=pretrained).features
                                       
         self.relu = nn.ReLU(inplace=True)                
@@ -126,9 +127,9 @@ class VGGCEUNet(nn.Module):
         
         self.final = nn.Conv2d(num_filters, num_classes, kernel_size=1)
         
-        if activation == 'sigmoid':
+        if self.activation == 'sigmoid':
             self.final_act = nn.Sigmoid()
-        elif activation == 'tanh':
+        elif self.activation == 'tanh':
             self.final_act = nn.Tanh()
         
 
@@ -153,5 +154,7 @@ class VGGCEUNet(nn.Module):
         if self.down_sample < 1:
             x_out = interpolate(x_out, scale_factor = self.down_sample)
 
-        x_out = self.final_act(x_out)
+        if self.activation != 'none':
+            x_out = self.final_act(x_out)
+            
         return x_out

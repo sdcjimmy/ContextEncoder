@@ -29,8 +29,9 @@ COPY .s3cfg.cluster .
 ADD lib lib/
 ADD model model/
 ADD train.py .
+ADD run-cluster.sh .
 
 CMD s3cmd -c /home/user/.s3cfg.cluster sync s3://szu-yeu.hu/SSI.tar.gz ${SLURM_JOB_SCRATCHDIR}/ ;\
 tar xvf ${SLURM_JOB_SCRATCHDIR}/SSI.tar.gz --directory ${SLURM_JOB_SCRATCHDIR}/ ;\
-python /home/user/train.py -e TEST -cl ;\
+bash /home/user/run-cluster.sh ;\
 s3cmd -c /home/user/.s3cfg.cluster sync ${SLURM_JOB_SCRATCHDIR}/results/ s3://szu-yeu.hu/jobs/${SLURM_JOB_NAME}-${SLURM_JOB_ID}/
