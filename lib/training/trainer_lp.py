@@ -39,6 +39,7 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
                  loss_type = 'hinge',
                  padding_center = False,                 
                  center_distribution = None, 
+                 mse_loss_percentage = 0.95,
                  experiment = 'TEST',                 
                  gpu = '0',
                  cluster = False,                 
@@ -48,7 +49,9 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
                         
         
         self.update_info('loss_type', loss_type)
-        self.set_default_info()
+        self.update_info('Generator_mse_loss', round(mse_loss_percentage,2))
+        self.update_info('Generator_adv_loss', round(1.0 - mse_loss_percentage, 2))
+        #self.set_default_info()
         
         # Update the network
         self.generator, self.discriminator = self.get_network(net = network)
@@ -161,7 +164,6 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
             dlabel = torch.FloatTensor(self.info['batch_size']).to(self.device)
             
             for i, (imgs, centers, dcm_labels) in enumerate(self.train_loader):     
-                print(f'center size:{centers.size()}')
                 batch_size = imgs.size(0)
                 imgs, centers, dcm_labels = imgs.to(self.device), centers.to(self.device), dcm_labels.to(self.device)           
                 

@@ -9,7 +9,7 @@ import torch
 
 from model import *
 from lib.training import *
-from lib.preprocessing import *
+from lib.preprocessing.single_transforms import *
 from lib.dataloading import *
 from lib.loss_functions import *
 from lib.evaluation import *
@@ -34,6 +34,7 @@ def get_args():
     parser.add_argument('-p', '--padding_center', action = 'store_true', default = False) 
     parser.add_argument('-cl', '--cluster', action = 'store_true', help = "Whether the model is trained on a cluster",default = False) 
     parser.add_argument('-lx', '--loss_type', choices = ['hinge', 'dcgan'], type = str, help = "The loss function", default = 'hinge')
+    parser.add_argument('-mp', '--mse_loss_percentage', type = float, default = 0.99) 
     
 
 
@@ -52,6 +53,7 @@ if __name__ == '__main__':
                             loss_type = args.loss_type,
                             padding_center = args.padding_center,
                             center_distribution = args.center_distribution,
+                            mse_loss_percentage = args.mse_loss_percentage,
                             experiment = args.experiment,
                             gpu = args.gpu,
                             cluster = args.cluster)
