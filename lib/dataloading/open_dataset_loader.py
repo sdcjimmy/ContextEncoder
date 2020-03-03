@@ -14,8 +14,6 @@ from skimage.filters import gaussian
 from skimage.measure import label
 from scipy.ndimage.morphology import binary_fill_holes
 
-from net import *
-from lib import *
 from PIL import Image, ImageFile
 from torchvision.utils import save_image
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -431,7 +429,7 @@ class SingleClassDataset_DCM(Dataset):
         
 
 class SingleClassDataset_Gray(Dataset):
-    def __init__(self, img_dir, mask_dir, list_id = None, transform = None, gpu='0',
+    def __init__(self, img_dir, mask_dir, list_id = None, transform = None, 
                  ori_ext = '*.png', mask_ext = '*.png', mask_appendix = '', test=False):
         self.ori_ext = ori_ext
         self.mask_ext = mask_ext
