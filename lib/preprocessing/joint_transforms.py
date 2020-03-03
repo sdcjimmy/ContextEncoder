@@ -28,8 +28,20 @@ class RandomHorizontallyFlip(object):
 class Equalization(object):
     def __call__(self, img, liver_mask, kidney_mask):
         return ImageOps.equalize(img), liver_mask, kidney_mask
-
     
+class GammaAdjustment(object):
+    def __init__(self, gamma = 1.3):
+        self.gamma = gamma
+    def __call__(self, img, liver_mask, kidney_mask):
+        return F.adjust_gamma(img = img, gamma = self.gamma), liver_mask, kidney_mask
+        
+class ContrastAdjustment(object):
+    def __init__(self, contrast_factor = 2):
+        self.contrast_factor = contrast_factor
+    def __call__(self, img, liver_mask, kidney_mask):
+        return F.adjust_contrast(img = img, contrast_factor=self.contrast_factor), liver_mask, kidney_mask
+    
+     
 class GaussianNoise(object):
     def __call__(self, img, liver_mask, kidney_mask):
         return img + torch.randn_like(img), liver_mask, kidney_mask  
@@ -66,6 +78,20 @@ class Normalization(object):
         self.inplace = inplace
     def __call__(self, img, liver_mask, kidney_mask):
         return F.normalize(img, self.mean, self.std, self.inplace), liver_mask, kidney_mask
+    
+class Grayscale(object):
+    def __init__(self, num_output_channels=1):
+        self.num_output_channels = num_output_channels
+
+    def __call__(self, img, liver_mask, kidney_mask):
+        """
+        Args:
+            img (PIL Image): Image to be converted to grayscale.
+
+        Returns:
+            PIL Image: Randomly grayscaled image.
+        """
+        return F.to_grayscale(img, num_output_channels=self.num_output_channels), liver_mask, kidney_mask
         
 class Resize(object):
     def __init__(self, size, interpolation = Image.BILINEAR):
@@ -136,16 +162,31 @@ def get_nonorm_transformer():
                     Resize((192,320)),
                     ToTensor()])}
 
-def get_norm_transformer():
-    return {'val': Compose([
-            ToPILImage(),
-            #Resize((192,320)),
-            Resize((256,400)),
-            Equalization(),
-            ToTensor(),
-            Normalization([0.367],[0.384])
-            ])
-           }
+def get_transformer_norm():
+    transform = {
+    'train': Compose([
+        ToPILImage(),
+        RandomHorizontallyFlip(),
+        RandomRotate(45),        
+        Resize((256,400)),
+        ContrastAdjustment(2),
+        GammaAdjustment(),                
+        Grayscale(num_output_channels=3),
+        ToTensor(),                
+        Normalization([0.170,0.170,0.170],[0.276,0.276,0.276])
+    ]),
+    'val': Compose([
+        ToPILImage(),        
+        Resize((256,400)),
+        ContrastAdjustment(2),
+        GammaAdjustment(),    
+        Grayscale(num_output_channels=3),
+        ToTensor(),       
+        Normalization([0.170,0.170,0.170],[0.276,0.276,0.276])
+    ])
+    }
+    return transform
+
 
 '''
 def get_norm_transformer():
