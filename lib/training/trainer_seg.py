@@ -481,7 +481,7 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
                 self.results['validation_loss'].append(val_loss)                
                 self.results['validation_dice'].append(val_dice)
                         
-
+                print('Validation ice Coeff: {}'.format(val_dice))
                 
                 if val_dice > self.results['best_dice']:
                     self.results['best_dice'] = val_dice                    
