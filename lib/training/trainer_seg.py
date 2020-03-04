@@ -509,11 +509,11 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
             loss = self.criterion(val_masks_pred, val_true_masks)
             tot_loss += loss.item()
 
-            val_masks_pred = (val_masks_pred > 0.5).float()
+            val_masks_pred = (val_masks_pred > 0.5).float()            
                     
             dc = dice(val_masks_pred, val_true_masks, return_mean = True).item()
 
-        tot_dice += dc
+            tot_dice += dc
         return tot_loss/(i+1), tot_dice/(i+1)
         
     
