@@ -1,3 +1,3 @@
-from .trainer import *
-from .trainer_lp import *
-from .trainer_seg import HRISegNetworkTrainer, NerveSegNetworkTrainer
+#from .trainer import *
+#from .trainer_lp import *
+#from .trainer_seg import HRISegNetworkTrainer, NerveSegNetworkTrainer

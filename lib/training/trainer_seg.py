@@ -171,7 +171,7 @@ class SegNetworkTrainer(object):
         torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch_last.pth"))
         
     def load_weights(self, weight_path):
-        self.network.load_state_dict(torch.load(weight_path))
+        self.network.load_state_dict(torch.load(weight_path), map_location = self.device)
         
         
 
@@ -324,7 +324,7 @@ class HRISegNetworkTrainer(SegNetworkTrainer):
             else:
                 dc = dice(val_masks_pred, val_true_masks, return_mean = True).item()
 
-        tot_dice += dc
+            tot_dice += dc
         return tot_loss/(i+1), tot_dice/(i+1)
         
     
@@ -371,8 +371,6 @@ class HRISegNetworkTrainer(SegNetworkTrainer):
                                     'validation_loss': self.results['validation_loss']})
         loss_history.to_csv(os.path.join(self.output_dir, 'loss_history.csv'))
         
-    def load_weights(self, weight_path):
-        self.network.load_state_dict(torch.load(weight_path))
         
 
             
@@ -552,8 +550,6 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
                                     'validation_loss': self.results['validation_loss']})
         loss_history.to_csv(os.path.join(self.output_dir, 'loss_history.csv'))
         
-    def load_weights(self, weight_path):
-        self.network.load_state_dict(torch.load(weight_path))
             
             
         

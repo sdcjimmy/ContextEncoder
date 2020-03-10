@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from model import *
-from lib.training import *
+from lib.training.trainer import *
 from lib.preprocessing.single_transforms import get_transformer_norm
 from lib.dataloading import *
 from lib.loss_functions import *
