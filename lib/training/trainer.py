@@ -23,7 +23,6 @@ from torch.nn.functional import interpolate
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.utils import make_grid
 from torch import optim, nn
-#from torch.utils.tensorboard import SummaryWriter
 
 class NetworkTrainer(object):
 

@@ -110,7 +110,7 @@ class VGGCEUNet(nn.Module):
         
         if self_trained != '':            
             print(f"Load weights from {self_trained}")
-            pretrained_dict = torch.load(self_trained)            
+            pretrained_dict = torch.load(self_trained, map_location = 'cuda0')            
             model_dict = self.state_dict()            
             # 1. filter out unnecessary keys
             pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}

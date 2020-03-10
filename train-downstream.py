@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from model import *
-from lib.training import *
+from lib.training.trainer_seg import *
 from lib.preprocessing import *
 from lib.dataloading import *
 from lib.loss_functions import *
@@ -65,8 +65,9 @@ if __name__ == '__main__':
                             gpu = args.gpu)
         
     elif args.task == 'nerve':
-        img_dir = '/mnt/DL_sw/Data/ultrasound-nerve-segmentation/train_ori/'
-        mask_dir = '/mnt/DL_sw/Data/ultrasound-nerve-segmentation/train_mask/'
+        print('Training the ultrasound nerve segmentation')
+        img_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_ori/'
+        mask_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_mask/'
         trainer = NerveSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir,
                             network = args.model,
                             opt = args.optimizer,
