@@ -39,13 +39,14 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
                  loss_type = 'hinge',
                  padding_center = False,                 
                  center_distribution = None, 
+                 random_shift = False,
                  mse_loss_percentage = 0.95,
                  experiment = 'TEST',                 
                  gpu = '0',
                  cluster = False,                 
                  ):
         
-        super().__init__(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment, gpu, cluster)
+        super().__init__(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, random_shift, experiment, gpu, cluster)
                         
         
         self.update_info('loss_type', loss_type)
@@ -249,12 +250,12 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
                 print('Validation MSE Loss: {}'.format(MSE_loss))
                 print('Validation Adv Loss: {}'.format(Adv_loss))
                                 
-                if MSE_loss  < self.results['best_MSE']:
+                if MSE_loss + Adv_loss < self.results['best_loss']:
                     self.results['best_loss'] = MSE_loss + Adv_loss
                     self.results['best_MSE'] = MSE_loss                                        
                     self.results['best_epoch'] = epoch + 1
                     torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))                   
-                    print("Best Validation MSE improved!")                                    
+                    print("Best Validation Loss improved!")                                    
                     
                 elif (epoch+1) % self.info['sample_interval'] == 0:
                     torch.save(self.generator.state_dict(), os.path.join(self.output_dir, "epoch{}.pth".format(epoch+1)))       

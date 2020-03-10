@@ -15,7 +15,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
     
-    def __init__(self, img_file, rel_path = "" , shuffle = True, list_id = None, transform = None, inpaint = True, rand = None, output_resize = False):   
+    def __init__(self, img_file, rel_path = "" , shuffle = True, list_id = None, transform = None, inpaint = True, rand_init = None, output_resize = False, rand_shift = False):   
         
         self.df = pd.read_csv(img_file)        
         self.data_path = rel_path
@@ -24,7 +24,8 @@ class SSIDataset(Dataset):
         self.inpaint = inpaint
         self.probe = self.df.Probe.map(probe_dict)        
         self.study_binarize = self._binarize_study(self.df.Study.map(study_dict))
-        self.rand = rand
+        self.rand_init = rand_init
+        self.rand_shift = rand_shift
         self.output_resize = output_resize
 
         if shuffle == True:            
@@ -43,19 +44,26 @@ class SSIDataset(Dataset):
     def _inpaint(self, img, is_tensor = True):
         if is_tensor:
             w,h = img.shape[1], img.shape[2]
-            label = img[:, w//4:(w*3)//4, h//4:(h*3)//4].clone()
-            img[0,w//4:(w*3)//4, h//4:(h*3)//4] = img[0,:, :].min()            
-            img[1,w//4:(w*3)//4, h//4:(h*3)//4] = img[1,:, :].min()             
-            img[2,w//4:(w*3)//4, h//4:(h*3)//4] = img[2,:, :].min()
+            if self.rand_shift:                
+                w_shift = random.randint(-w//8, w//8)
+                h_shift = random.randint(-h//8, h//8)                
+            else:
+                w_shift, h_shift = 0, 0
             
-            if self.rand == 'gaussian':
-                img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4])
-                img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4])
-                img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.randn_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4])
-            elif self.rand == 'uniform':
-                img[0,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[0,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
-                img[1,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[1,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
-                img[2,w//4:(w*3)//4, h//4:(h*3)//4] += torch.rand_like(img[2,w//4:(w*3)//4, h//4:(h*3)//4]) *2 - 1
+            
+            label = img[:, w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4].clone()
+            img[0,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] = img[0,:, :].min()            
+            img[1,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] = img[1,:, :].min()             
+            img[2,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] = img[2,:, :].min()
+            
+            if self.rand_init == 'gaussian':
+                img[0,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.randn_like(img[0,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4])
+                img[1,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.randn_like(img[1,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4])
+                img[2,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.randn_like(img[2,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4])
+            elif self.rand_init == 'uniform':
+                img[0,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.rand_like(img[0,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4]) *2 - 1
+                img[1,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.rand_like(img[1,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4]) *2 - 1
+                img[2,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4] += torch.rand_like(img[2,w_shift+w//4:w_shift+(w*3)//4, h_shift+h//4:h_shift+(h*3)//4]) *2 - 1
             return img, label
         else:
             w, h = img.shape[0], img.shape[1]

@@ -32,6 +32,7 @@ def get_args():
     parser.add_argument('-cd', '--center_distribution', type = str, help = "The inital distribution for the center image", default = 'uniform')
     parser.add_argument('-d', '--dcm_loss', action = 'store_false', default = True) 
     parser.add_argument('-p', '--padding_center', action = 'store_true', default = False) 
+    parser.add_argument('-rs', '--random_shift', action = 'store_true', default = False) 
     parser.add_argument('-cl', '--cluster', action = 'store_true', help = "Whether the model is trained on a cluster",default = False) 
     parser.add_argument('-lx', '--loss_type', choices = ['hinge', 'dcgan'], type = str, help = "The loss function", default = 'hinge')
     parser.add_argument('-mp', '--mse_loss_percentage', type = float, default = 0.99) 
@@ -53,6 +54,7 @@ if __name__ == '__main__':
                             loss_type = args.loss_type,
                             padding_center = args.padding_center,
                             center_distribution = args.center_distribution,
+                            random_shift = args.random_shift,
                             mse_loss_percentage = args.mse_loss_percentage,
                             experiment = args.experiment,
                             gpu = args.gpu,

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 from model import *
-from lib.preprocessing import *
+from lib.preprocessing.single_transforms import get_transformer_norm
 from lib.dataloading import *
 from lib.loss_functions import *
 from lib.evaluation import *
@@ -36,6 +36,7 @@ class NetworkTrainer(object):
                  dcm_loss = True, 
                  padding_center = False,                 
                  center_distribution = None, 
+                 random_shift = False,
                  experiment = 'TEST',                 
                  gpu = '0',
                  cluster = False,
@@ -43,7 +44,7 @@ class NetworkTrainer(object):
         
         ## Set the default information
         self.info = OrderedDict()
-        self.set_info(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment)
+        self.set_info(opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, random_shift , experiment)
         self.set_default_info()
         self.device = torch.device("cuda:%s" % gpu if torch.cuda.is_available() else "cpu")                
 
@@ -93,7 +94,7 @@ class NetworkTrainer(object):
 
         self.save_results(init = True)
         
-    def set_info(self, opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, experiment):        
+    def set_info(self, opt, network, lr, batch_size, epochs, dcm_loss, padding_center, center_distribution, random_shift , experiment):        
         self.info['optimizer'] = opt
         self.info['network'] = network
         self.info['learning_rate'] = lr
@@ -102,6 +103,7 @@ class NetworkTrainer(object):
         self.info['dcm_loss'] = dcm_loss
         self.info['padding_center'] = padding_center
         self.info['center_distribution'] = center_distribution
+        self.info['random_shift'] = random_shift 
         self.info['experiment'] = experiment
         
     def set_default_info(self):
@@ -134,8 +136,8 @@ class NetworkTrainer(object):
         return results
     
         
-    def load_dataset(self, list_id = None, transform = None, inpaint = False, rand = None):
-        return SSIDataset(img_file = self.img_file, rel_path = self.data_path, list_id = list_id, transform = transform, inpaint = inpaint, rand = rand, output_resize = self.info['output_resize']) 
+    def load_dataset(self, list_id = None, transform = None, inpaint = False, rand_init = None, rand_shift = False):
+        return SSIDataset(img_file = self.img_file, rel_path = self.data_path, list_id = list_id, transform = transform, inpaint = inpaint, rand_init = rand_init, rand_shift = rand_shift, output_resize = self.info['output_resize']) 
         
         
     def data_split(self, validation_split = 0.2, random_seed = 123, shuffle_dataset = True):
@@ -150,8 +152,8 @@ class NetworkTrainer(object):
         
     def get_data_loader(self):
         train_indices, val_indices = self.data_split()
-        train_dataset = self.load_dataset(list_id = train_indices, transform = self.transform['train'], inpaint = True, rand = self.info['center_distribution'])
-        val_dataset = self.load_dataset(list_id = val_indices, transform = self.transform['val'], inpaint = True, rand = self.info['center_distribution'])
+        train_dataset = self.load_dataset(list_id = train_indices, transform = self.transform['train'], inpaint = True, rand_init = self.info['center_distribution'], rand_shift = self.info['random_shift'])
+        val_dataset = self.load_dataset(list_id = val_indices, transform = self.transform['val'], inpaint = True, rand_init = self.info['center_distribution'])
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.info['batch_size'], num_workers = 4)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=self.info['batch_size'], num_workers = 4)       
