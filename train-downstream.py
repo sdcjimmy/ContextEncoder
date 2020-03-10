@@ -34,7 +34,7 @@ def get_args():
     parser.add_argument('-g', '--gpu', type = str,  choices = ['0', '1'], help = "The gpu used", default = '0')
     parser.add_argument('-m', '--model', type = str,  choices = ['unet', 'unet-light', 'vggnet', 'res-unet','r2u-unet', 'vgg-ce-unet'], help = "The model used", default = 'vgg-ce-unet')
     parser.add_argument('-sk', '--shrink', type = float, help = "shrink size", default = 1.0)
-    parser.add_argument('-t', '--task', type = str,  choices = ['hri', 'nerve', 'quality'], help = "The downstream task", default = 'hri')
+    parser.add_argument('-t', '--task', type = str,  choices = ['hri', 'nerve', 'quality', 'thyroid'], help = "The downstream task", default = 'hri')
 
 
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         print('Training the ultrasound nerve segmentation')
         img_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_ori/'
         mask_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_mask/'
-        trainer = NerveSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir,
+        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.tif',
                             network = args.model,
                             opt = args.optimizer,
                             lr = args.learning_rate,
@@ -83,6 +83,24 @@ if __name__ == '__main__':
                             experiment = args.experiment,
                             gpu = args.gpu)
         
+    elif args.task == 'thyroid':
+        print('Training the ultrasound thyroid segmentation')
+        img_dir = '/mnt/DL_swRESTORED/Data/thyroid-ultrasound/Image-slc-train/'
+        mask_dir = '/mnt/DL_swRESTORED/Data/thyroid-ultrasound/Mask-slc-train/'
+        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.png',
+                            network = args.model,
+                            opt = args.optimizer,
+                            lr = args.learning_rate,
+                            reg = args.regularizer,
+                            loss_fx = args.loss,
+                            batch_size = args.batch_size,
+                            epochs = args.epochs,
+                            pretrain = args.pretrained,
+                            self_train = args.pretrain_dict,
+                            freeze = args.freeze,
+                            shrink = args.shrink,
+                            experiment = args.experiment,
+                            gpu = args.gpu)
         
     
     try:

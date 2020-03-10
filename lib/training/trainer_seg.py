@@ -376,10 +376,10 @@ class HRISegNetworkTrainer(SegNetworkTrainer):
             
             
 
-class NerveSegNetworkTrainer(SegNetworkTrainer):
+class SingleSegNetworkTrainer(SegNetworkTrainer):
 
     def __init__(self,
-                 img_dir, mask_dir,
+                 img_dir, mask_dir, ext, 
                  network = 'unet', 
                  opt = 'adam', 
                  lr = 0.001,
@@ -391,7 +391,7 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
                  self_train = '',
                  freeze = False,
                  shrink = 1,
-                 experiment = 'TEST',
+                 experiment = 'TEST',                 
                  gpu = '0'):
         
         super().__init__(network, opt, lr, reg, loss_fx, batch_size, epochs, pretrain, self_train, freeze, shrink, experiment, gpu)
@@ -402,6 +402,7 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
         ## Dataset
         self.img_dir = img_dir        
         self.mask_dir = mask_dir        
+        self.ext = ext
         self.all_dataset = self.load_dataset()
         
         ## Output folder path 
@@ -440,7 +441,7 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
     
     def load_dataset(self, list_id = None, transform = None):
         return SingleClassDataset_Gray(img_dir = self.img_dir, mask_dir = self.mask_dir, list_id = list_id, 
-                                           transform = transform, ori_ext = '*.tif', mask_ext = '*.tif') 
+                                           transform = transform, ori_ext = self.ext, mask_ext = self.ext) 
 
     def train(self):        
         self.network = self.network.to(self.device)
@@ -479,7 +480,7 @@ class NerveSegNetworkTrainer(SegNetworkTrainer):
                 self.results['validation_loss'].append(val_loss)                
                 self.results['validation_dice'].append(val_dice)
                         
-                print('Validation ice Coeff: {}'.format(val_dice))
+                print('Validation dice Coeff: {}'.format(val_dice))
                 
                 if val_dice > self.results['best_dice']:
                     self.results['best_dice'] = val_dice                    
