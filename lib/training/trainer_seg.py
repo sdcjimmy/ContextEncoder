@@ -379,7 +379,7 @@ class HRISegNetworkTrainer(SegNetworkTrainer):
 class SingleSegNetworkTrainer(SegNetworkTrainer):
 
     def __init__(self,
-                 img_dir, mask_dir, ext, 
+                 img_dir, mask_dir, ext, task,
                  network = 'unet', 
                  opt = 'adam', 
                  lr = 0.001,
@@ -406,7 +406,7 @@ class SingleSegNetworkTrainer(SegNetworkTrainer):
         self.all_dataset = self.load_dataset()
         
         ## Output folder path 
-        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results/downstream/nerve/", experiment)
+        self.output_dir = os.path.join("/mnt/Liver/GE_study_hri/ContextEncoder/results/downstream/",task, experiment)
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
                                  

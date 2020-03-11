@@ -68,7 +68,7 @@ if __name__ == '__main__':
         print('Training the ultrasound nerve segmentation')
         img_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_ori/'
         mask_dir = '/mnt/DL_swRESTORED/Data/ultrasound-nerve-segmentation/train_mask/'
-        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.tif',
+        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.tif', task = 'nerve',
                             network = args.model,
                             opt = args.optimizer,
                             lr = args.learning_rate,
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         print('Training the ultrasound thyroid segmentation')
         img_dir = '/mnt/DL_swRESTORED/Data/thyroid-ultrasound/Image-slc-train/'
         mask_dir = '/mnt/DL_swRESTORED/Data/thyroid-ultrasound/Mask-slc-train/'
-        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.png',
+        trainer = SingleSegNetworkTrainer(img_dir = img_dir, mask_dir = mask_dir, ext = '*.png', task ='thyroid',
                             network = args.model,
                             opt = args.optimizer,
                             lr = args.learning_rate,
