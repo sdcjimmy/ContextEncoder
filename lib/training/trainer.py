@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 from model import *
-from lib.preprocessing.single_transforms import get_transformer_norm
+from lib.preprocessing import single_transforms 
 from lib.dataloading import *
 from lib.loss_functions import *
 from lib.evaluation import *
@@ -170,13 +170,18 @@ class NetworkTrainer(object):
     def get_network(self, net = 'ce-net'):                
         if net == 'ce-net':
             return CENet(), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1)
+        elif net == 'res-ce-net':
+            return CENet(backbone = 'resnet'), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1)
         elif net == 'vgg-unet':
             self.info['output_resize'] = True
             return VGGCEUNet(num_classes = 3, activation = 'tanh'), Discriminator(n_input = 3, n_classes = self.info['n_dcm_labels'] + 1, n_block = 5)
         
     
     def get_transform(self):
-        return get_transformer_norm()
+        if self.info['network'] == 'res-ce-net':
+            return single_transforms.get_transformer_norm(resize = (256,384))
+        else:
+            return single_transforms.get_transformer_norm()
     
     
     def get_loss_fx(self, loss_fx):

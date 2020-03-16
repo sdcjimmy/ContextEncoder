@@ -48,13 +48,13 @@ def get_transformer():
     }
     return transform
     
-def get_transformer_norm():
+def get_transformer_norm(resize = (256,400)):
     transform = {
     'train': transforms.Compose([
         transforms.ToPILImage(),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(45),        
-        transforms.Resize((256,400)),
+        transforms.Resize(resize),
         ContrastAdjustment(2),
         GammaAdjustment(),                
         transforms.Grayscale(num_output_channels=3),
@@ -63,7 +63,7 @@ def get_transformer_norm():
     ]),
     'val': transforms.Compose([
         transforms.ToPILImage(),        
-        transforms.Resize((256,400)),
+        transforms.Resize(resize),
         ContrastAdjustment(2),
         GammaAdjustment(),    
         transforms.Grayscale(num_output_channels=3),

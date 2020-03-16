@@ -162,13 +162,13 @@ def get_nonorm_transformer():
                     Resize((192,320)),
                     ToTensor()])}
 
-def get_transformer_norm():
+def get_transformer_norm(resize = (256,400)):
     transform = {
     'train': Compose([
         ToPILImage(),
         RandomHorizontallyFlip(),
         RandomRotate(45),        
-        Resize((256,400)),
+        Resize(resize),
         ContrastAdjustment(2),
         GammaAdjustment(),                
         Grayscale(num_output_channels=3),
@@ -177,7 +177,7 @@ def get_transformer_norm():
     ]),
     'val': Compose([
         ToPILImage(),        
-        Resize((256,400)),
+        Resize(resize),
         ContrastAdjustment(2),
         GammaAdjustment(),    
         Grayscale(num_output_channels=3),

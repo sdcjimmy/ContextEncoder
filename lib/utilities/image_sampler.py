@@ -3,7 +3,7 @@ import numpy as np
 from torchvision.utils import make_grid
 
 class ImageSampler(object):
-    def __init__(self, max_images = 64, sample_p = 0.1):
+    def __init__(self, max_images = 16, sample_p = 0.05):
         self.n_images = 0
         self.max_images = max_images
         self.image_tensors = []
@@ -29,6 +29,7 @@ class ImageSampler(object):
         return true, pred
         
     def padding_center(self, imgs, centers):
+        b,c,w,h = imgs.size()
         new_img = imgs.clone()
-        new_img[:,:,64:192, 100:300] = centers
+        new_img[:,:,w//4:3*w//4, h//4:3*h//4] = centers
         return new_img     

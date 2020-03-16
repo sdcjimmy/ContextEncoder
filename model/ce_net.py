@@ -48,18 +48,26 @@ class GlobalAveragePooling(nn.Module):
 
 
 class CENet(nn.Module):
-    def __init__(self):
+    def __init__(self, backbone = 'vgg'):
         super(CENet, self).__init__()
-        self.encoder = models.vgg16_bn(pretrained=False).features
-        #self.fc = nn.Sequential(nn.Linear(),
-        #                        nn.Linear())
-        
-        self.decoder = nn.Sequential(
+        if backbone == 'vgg':
+            self.encoder = models.vgg16_bn(pretrained=False).features
+            self.decoder = nn.Sequential(
                         # The padding size should design for different input size
                         DecoderBlock(512,256, padding=(1,0), output_padding = (1,0)),
                         DecoderBlock(256,128),
                         DecoderBlock(128,64),
                         DecoderBlock(64,32))
+        elif backbone == 'resnet':
+            res = models.resnet50(pretrained=False)
+            res = list(res.children())[:-2]
+            self.encoder = nn.Sequential(*res)
+            self.decoder = nn.Sequential(
+                        DecoderBlock(2048,512),
+                        DecoderBlock(512,128),
+                        DecoderBlock(128,64),
+                        DecoderBlock(64,32))                    
+
         
         self.conv = nn.Conv2d(in_channels=32, out_channels=3, kernel_size=1)
         

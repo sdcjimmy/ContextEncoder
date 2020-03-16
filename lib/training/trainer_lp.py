@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 from model import *
-from lib.preprocessing import *
+from lib.preprocessing.single_transforms import get_transformer_norm
 from lib.dataloading import *
 from lib.loss_functions import *
 from lib.evaluation import *
@@ -55,6 +55,7 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
         #self.set_default_info()
         
         # Update the network
+        print(network)
         self.generator, self.discriminator = self.get_network(net = network)
         self.train_loader, self.val_loader = self.get_data_loader()
         self.criteriaGENloss, self.criteriaDISloss = self.get_gan_loss(loss_type)
@@ -76,7 +77,9 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
     
     def get_network(self, net = 'ce-net'):                
         if net == 'ce-net':                        
-            return CENet(), LinearDiscriminator(n_input = 3, n_classes = self.info['n_dcm_labels'])
+            return CENet(backbone = 'vgg'), LinearDiscriminator(n_input = 3, n_classes = self.info['n_dcm_labels'])
+        elif net == 'res-ce-net':
+            return CENet(backbone = 'resnet'), LinearDiscriminator(n_input = 3, n_classes = self.info['n_dcm_labels'])
         elif net == 'vgg-unet':
             self.info['output_resize'] = True
             return VGGCEUNet(num_classes = 3, activation = 'tanh'), LinearDiscriminator(n_input = 3, n_classes = self.info['n_dcm_labels'])                
