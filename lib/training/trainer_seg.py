@@ -118,6 +118,9 @@ class SegNetworkTrainer(object):
             net = R2U_Net(img_ch = 1, output_ch = 2)
         elif self.info['network'] == 'vgg-ce-unet':
             net = VGGCEUNet(num_classes = self.info['num_classes'], pretrained = self.info['pretrain'], self_trained = self.info['self_train'], freeze = self.info['freeze'], activation = 'sigmoid')
+        elif self.info['network'] == 'res-ce-unet':
+            net = ResCEUNet(n_classes = self.info['num_classes'], pretrained = self.info['pretrain'], self_trained = self.info['self_train'], freeze = self.info['freeze'])
+           
         
         return net
     
@@ -133,7 +136,10 @@ class SegNetworkTrainer(object):
         return criterion
     
     def get_transform(self):
-        return get_transformer_norm()
+        if self.info['network'] == 'res-ce-unet':
+            return get_transformer_norm(resize = (256, 384))
+        else:
+            return get_transformer_norm()
     
     def train(self):
         # Customize for each subclass

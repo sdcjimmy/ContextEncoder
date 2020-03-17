@@ -32,7 +32,7 @@ def get_args():
     parser.add_argument('-f', '--freeze', action = 'store_true', default = False)
     parser.add_argument('-pd', '--pretrain_dict', type = str,  help = "The path to the pre-train model", default = '')
     parser.add_argument('-g', '--gpu', type = str,  choices = ['0', '1'], help = "The gpu used", default = '0')
-    parser.add_argument('-m', '--model', type = str,  choices = ['unet', 'unet-light', 'vggnet', 'res-unet','r2u-unet', 'vgg-ce-unet'], help = "The model used", default = 'vgg-ce-unet')
+    parser.add_argument('-m', '--model', type = str,  choices = ['unet', 'unet-light', 'vggnet', 'res-unet','r2u-unet', 'vgg-ce-unet','res-ce-unet'], help = "The model used", default = 'vgg-ce-unet')
     parser.add_argument('-sk', '--shrink', type = float, help = "shrink size", default = 1.0)
     parser.add_argument('-t', '--task', type = str,  choices = ['hri', 'nerve', 'quality', 'thyroid'], help = "The downstream task", default = 'hri')
 

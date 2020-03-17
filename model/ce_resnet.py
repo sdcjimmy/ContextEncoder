@@ -80,12 +80,12 @@ class UpBlockForUNetWithResNet50(nn.Module):
         return x
 
 
-class UNetWithResnet50Encoder(nn.Module):
+class ResCEUNet(nn.Module):
     DEPTH = 6
 
-    def __init__(self, n_classes=2, self_trained = '', freeze = False):
+    def __init__(self, n_classes=2, pretrained = False, self_trained = '', freeze = False):
         super().__init__()
-        resnet = torchvision.models.resnet.resnet50(pretrained=False)
+        resnet = torchvision.models.resnet.resnet50(pretrained=pretrained)
         resnet = list(resnet.children())[:-2]
         self.encoder = nn.Sequential(*resnet)
         
@@ -129,32 +129,30 @@ class UNetWithResnet50Encoder(nn.Module):
         self.up_blocks = nn.ModuleList(up_blocks)
 
         self.out = nn.Conv2d(64, n_classes, kernel_size=1, stride=1)
+        self.final_act = nn.Sigmoid()
 
     def forward(self, x, with_output_feature_map=False):
         pre_pools = dict()
         pre_pools[f"layer_0"] = x
-        print(x.size())
         x = self.input_block(x)
-        print(x.size())
         pre_pools[f"layer_1"] = x
         x = self.input_pool(x)
-        print(x.size())
 
         for i, block in enumerate(self.down_blocks, 2):
-            print(x.size())
             x = block(x)
-            print(x.size())
-            if i == (UNetWithResnet50Encoder.DEPTH - 1):
+            if i == (ResCEUNet.DEPTH - 1):
                 continue
             pre_pools[f"layer_{i}"] = x
 
         x = self.bridge(x)
 
         for i, block in enumerate(self.up_blocks, 1):
-            key = f"layer_{UNetWithResnet50Encoder.DEPTH - 1 - i}"
+            key = f"layer_{ResCEUNet.DEPTH - 1 - i}"
             x = block(x, pre_pools[key])
         output_feature_map = x
         x = self.out(x)
+        x = self.final_act(x)
+
         del pre_pools
         if with_output_feature_map:
             return x, output_feature_map
