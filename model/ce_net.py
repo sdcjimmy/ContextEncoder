@@ -122,7 +122,11 @@ class LinearDiscriminator(nn.Module):
         
         self.classifier = utils.spectral_norm(nn.Linear(512, 1))
         #self.linear_project = utils.spectral_norm(nn.Embedding(n_classes, 512))
-        self.linear_project = utils.spectral_norm(nn.Linear(512, n_classes))
+        if n_classes == 0:
+            self.dcm = False
+        else:
+            self.dcm = True
+            self.linear_project = utils.spectral_norm(nn.Linear(512, n_classes))
 
     def forward(self, x, y):
         x = self.conv1(x)
@@ -135,8 +139,12 @@ class LinearDiscriminator(nn.Module):
         x = x.view(-1, 512)        
         
         x1 = self.classifier(x)        
+        
+        if self.dcm:
+            x2 = torch.sum(self.linear_project(x)*y, dim = 1, keepdim = True)                
+            out = x1 + x2
+        else:
+            out = x1
                 
-        x2 = torch.sum(self.linear_project(x)*y, dim = 1, keepdim = True)                
-                
-        return x1 + x2
+        return out
         
