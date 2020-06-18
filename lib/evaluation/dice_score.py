@@ -6,6 +6,15 @@ from torch import nn
 
 
 def dice(x, y, batch_dice = True, loss_mask = None, do_bg = True, smooth = 1., square = False, return_mean = False):
+    '''The function to calculate the dice score
+    parameters:
+        - x, y: the two batch of binary images to calculate the dice score
+        - return_mean: return the individual images dice score in the batch if False, return the mean Dice score in the batch if True.
+        - loss_mask: a loss mask to adjust the dice (should leave as default)
+        - do_bg: calcuate the background dice (should leave as default)
+        - smooth: smoothing factor to avoid divide by zero
+        - squre: square when calculating dice
+    '''
     shp_x = x.shape
 
     if batch_dice:

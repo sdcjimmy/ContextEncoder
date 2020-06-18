@@ -72,7 +72,7 @@ class NetworkTrainer(object):
         
         ## Dataset              
         if self.info['experiment'] == 'TEST':
-            self.all_dataset = self.load_dataset(list_id = range(101))
+            self.all_dataset = self.load_dataset(list_id = range(100))
         else:
             self.all_dataset = self.load_dataset()        
         

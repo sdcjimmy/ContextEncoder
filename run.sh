@@ -21,4 +21,4 @@
 
 #python train.py -e nopadding-nodcm-uni2   -n 300 -b 8 -l 0.0001 -p -d -cd uniform
 
-python train.py -e dt-nerve-base -m vgg-unet -n 300 -b 8 -l 0.0001  
+#python train.py -e dt-nerve-base -m vgg-unet -n 300 -b 8 -l 0.0001  

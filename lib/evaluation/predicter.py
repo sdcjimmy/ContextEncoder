@@ -23,6 +23,16 @@ from torch import optim, nn
 #from torch.utils.tensorboard import SummaryWriter
 
 class NetworkPredicter(object):
+    '''The class to handle the inference
+    parameters:
+        - task:  the task to predict
+        - network: the model architecture
+        - batch_size: the inference batch size
+        - weight_path: pretrained weights
+        - gpu: the gpu used
+        - bootstrap_n: if greater than 0, perform bootstrap on the test set
+        - output_dir: the directory the put the results
+    '''
 
     def __init__(self, 
                  task,

@@ -51,7 +51,7 @@ class CENet(nn.Module):
     def __init__(self, backbone = 'vgg'):
         super(CENet, self).__init__()
         if backbone == 'vgg':
-            self.encoder = models.vgg16_bn(pretrained=False).features
+            self.encoder = models.vgg16_bn(pretrained=True).features
             self.decoder = nn.Sequential(
                         # The padding size should design for different input size
                         DecoderBlock(512,256, padding=(1,0), output_padding = (1,0)),
@@ -148,3 +148,32 @@ class LinearDiscriminator(nn.Module):
                 
         return out
         
+
+class DicomNet(nn.Module):
+    def __init__(self, backbone = 'resnet', n_classes = 8):
+        super(DicomNet, self).__init__()
+        if backbone == 'vgg':
+            self.encoder = models.vgg16_bn(pretrained=False).features
+            self.conv = nn.Conv2d(in_channels=512, out_channels=128, kernel_size=1)
+        elif backbone == 'resnet':
+            
+            res = models.resnet50(pretrained=False)
+            res = list(res.children())[:-2]
+            self.encoder = nn.Sequential(*res)
+            self.conv = nn.Conv2d(in_channels=2048, out_channels=128, kernel_size=1)
+        
+        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.linear = nn.Linear(128, n_classes)
+        self.activation = nn.Sigmoid()
+        
+    def forward(self,x):
+        x = self.encoder(x)
+        x = self.conv(x)        
+        x = self.avgpool(x)        
+        x = x.view(-1, 128)
+        x = self.linear(x)
+        out = self.activation(x)
+
+        return out
+
+

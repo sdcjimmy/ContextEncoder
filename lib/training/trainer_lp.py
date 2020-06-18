@@ -67,7 +67,7 @@ class LinearProjectNetworkTrainer(NetworkTrainer):
         self.info['Generator_mse_loss'] = 0.95
         self.info['Discriminator_adv_loss'] = 1.0
         self.info['Discriminator_dcm_loss'] = 0.0
-        self.info['sample_interval'] = 10
+        self.info['sample_interval'] = 20
         self.info['output_resize'] = False
         
         if self.info['dcm_loss']:

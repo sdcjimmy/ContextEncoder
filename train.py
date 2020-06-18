@@ -9,6 +9,7 @@ import torch
 
 from model import *
 from lib.training.trainer_lp import *
+from lib.training.trainer_class import *
 from lib.preprocessing.single_transforms import get_transformer_norm
 from lib.dataloading import *
 from lib.loss_functions import *
@@ -21,7 +22,7 @@ from torch import optim, nn
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--experiment', type = str, help = "The name of the experiement", default = 'TEST')
-    parser.add_argument('-m', '--model', type = str, choices = ['ce-net', 'res-ce-net','vgg-unet'], help = "The name of the model", default = 'ce-net')
+    parser.add_argument('-m', '--model', type = str, choices = ['dicom-resnet','dicom-vggnet','ce-net', 'res-ce-net','vgg-unet'], help = "The name of the model", default = 'ce-net')
     parser.add_argument('-n', '--epochs', type = int, help = "The number of epochs", default = 10)
     parser.add_argument('-b', '--batch_size', type = int, help = "The batch size", default = 4)
     parser.add_argument('-l', '--learning_rate', type = float, help = "The learning rate", default = 0.02)
@@ -44,8 +45,17 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-
-    trainer = LinearProjectNetworkTrainer(opt = args.optimizer,
+    if args.model in ['dicom-resnet', 'dicom-vggnet']:
+        trainer = ClassNetworkTrainer(opt = args.optimizer, 
+                                     network = args.model,
+                            lr = args.learning_rate,
+                            batch_size = args.batch_size,
+                            epochs = args.epochs,
+                            experiment = args.experiment,
+                            gpu = args.gpu,
+                            cluster = args.cluster)
+    else:
+        trainer = LinearProjectNetworkTrainer(opt = args.optimizer,
                              network = args.model, 
                             lr = args.learning_rate,
                             batch_size = args.batch_size,

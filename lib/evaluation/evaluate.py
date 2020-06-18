@@ -7,7 +7,8 @@ from .dice_score import dice
 
 
 def eval_net(network, data_loader, criterion, device, threshold = 0.5):
-    """Evaluation without the densecrf with the dice coefficient"""
+    """Evaluation the model performance
+    """
     network.eval()
     pred_labels = np.array([])    
     true_labels = np.array([])
@@ -29,7 +30,7 @@ def eval_net(network, data_loader, criterion, device, threshold = 0.5):
 
 
 def eval_net_mclass(net, data_loader, device, loss_fx):
-    """Evaluation without the densecrf with the dice coefficient"""
+    """"deprecated function, can be ignored"""
     net.eval()
     tot_liver = 0
     tot_kidney = 0

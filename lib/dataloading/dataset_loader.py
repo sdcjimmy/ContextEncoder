@@ -14,8 +14,23 @@ from .mapping_dict import *
 from sklearn.preprocessing import MultiLabelBinarizer
 
 class SSIDataset(Dataset):    
+    '''The dataset function to load the SSI dataset for self-supervised learning
+    parameters:
+        - img_file: the csv file path specifiy all the data files path (Column Image_Path)
+        - rel_path: The root file path for the images folder. if not specify, the data loading will use the absolute path.
+        - shuffle: shuffle the order of the data
+        - list_id: load only part of the dataset by image index (use in splitting training/validation/test)
+        - transform: the pytorch transformer
+        - inpaint: crop the center part of the images for context encoder
+        - rand_init: randomly initilize the center cropped part, can be uniform or gaussian
+        - output_resize: resize the output size for discriminator
+        - rand_shift: randomly shift the center cropped position for data augmentation
+        - classificiation: return the DICOM labels for simple classficiation task
+
+    '''
+
     
-    def __init__(self, img_file, rel_path = "" , shuffle = True, list_id = None, transform = None, inpaint = True, rand_init = None, output_resize = False, rand_shift = False):   
+    def __init__(self, img_file, rel_path = "" , shuffle = True, list_id = None, transform = None, inpaint = True, rand_init = None, output_resize = False, rand_shift = False, classification = False):   
         
         self.df = pd.read_csv(img_file)        
         self.data_path = rel_path
@@ -27,6 +42,7 @@ class SSIDataset(Dataset):
         self.rand_init = rand_init
         self.rand_shift = rand_shift
         self.output_resize = output_resize
+        self.classification = classification
 
         if shuffle == True:            
             np.random.shuffle(self.indices)                        
@@ -129,4 +145,7 @@ class SSIDataset(Dataset):
             
             return crop_img, center, labels
         else:
-            return img
+            if self.classification:
+                return img, self._get_labels(idx)
+            else:
+                return img

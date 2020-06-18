@@ -19,6 +19,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
               
 class LiverHRIDatasetMulti_simple(Dataset):
+    ''' The dataset class to load the HRI dataset
+    '''
     
     def __init__(self, img_dir, kidney_mask_dir, liver_mask_dir, list_id = None, transform = None, gpu='0'):
     

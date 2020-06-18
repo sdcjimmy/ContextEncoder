@@ -85,7 +85,7 @@ class ResCEUNet(nn.Module):
 
     def __init__(self, n_classes=2, pretrained = False, self_trained = '', freeze = False):
         super().__init__()
-        resnet = torchvision.models.resnet.resnet50(pretrained=pretrained)
+        resnet = torchvision.models.resnet.resnet50(pretrained=True)
         resnet = list(resnet.children())[:-2]
         self.encoder = nn.Sequential(*resnet)
         
