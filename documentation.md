@@ -145,7 +145,16 @@ The classes to handle downstream segmentation tasks training. This file contain 
 
 #### trainer_class.py
 The class to handle downstream classification tasks training
-
+- method `get_network`:
+    1. `dicom-resnet`: the network to classify the DICOM labels directly, using RESNET as backbone
+    2. `dicom-vggnet`: the ntwork to classify the DICOM labels directly, using VGGNET as backbone
 
 ## utilities
 *Mostly deprecated function, may not be needed to run the script*
+
+
+
+# Model
+All the models were defined in this directory
+
+####
