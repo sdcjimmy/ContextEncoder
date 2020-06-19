@@ -3,6 +3,7 @@ __pycache__/
 
 results/
 notebook/mnist_train/
+notebook/
 
 run.sh
 run-downstream.sh
